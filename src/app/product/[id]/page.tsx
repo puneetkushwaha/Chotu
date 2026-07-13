@@ -36,7 +36,14 @@ export default function ProductDetailsPage() {
         return;
       }
       
-      const p = { ...pData.products, product_id: pData.product_id, store_id: pData.store_id, is_in_stock: pData.is_in_stock, price: pData.products.standard_mrp };
+      const pDataAny = pData as any;
+      const p = { 
+        ...pDataAny.products, 
+        product_id: pDataAny.product_id, 
+        store_id: pDataAny.store_id, 
+        is_in_stock: pDataAny.is_in_stock, 
+        price: pDataAny.products?.standard_mrp 
+      };
       setProduct(p);
 
       // 2. Fetch variants
