@@ -10,6 +10,10 @@ if (getApps().length === 0) {
     if (serviceAccountVar) {
       // Parse service account details from environment variable
       const serviceAccount = JSON.parse(serviceAccountVar);
+      // Clean private key format (replace literal \n with actual newlines)
+      if (serviceAccount.private_key) {
+        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+      }
       initializeApp({
         credential: cert(serviceAccount),
       });
