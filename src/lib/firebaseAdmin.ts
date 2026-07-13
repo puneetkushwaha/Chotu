@@ -5,19 +5,21 @@ import path from 'path';
 
 if (getApps().length === 0) {
   try {
-    const serviceAccountVar = process.env.FIREBASE_SERVICE_ACCOUNT;
-    
-    if (serviceAccountVar) {
-      // Parse service account details from environment variable
-      const serviceAccount = JSON.parse(serviceAccountVar);
-      // Clean private key format (replace literal \n with actual newlines)
-      if (serviceAccount.private_key) {
-        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-      }
+    const projectId = process.env.FIREBASE_PROJECT_ID;
+    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+
+    if (projectId && clientEmail && privateKey) {
+      // Reconstruct credentials from direct individual environment variables
+      const formattedPrivateKey = privateKey.replace(/\\n/g, '\n');
       initializeApp({
-        credential: cert(serviceAccount),
+        credential: cert({
+          projectId,
+          clientEmail,
+          privateKey: formattedPrivateKey,
+        }),
       });
-      console.log('Firebase Admin SDK initialized successfully from environment variable.');
+      console.log('Firebase Admin SDK initialized successfully from individual environment variables.');
     } else {
       // Fallback to local file for development
       const serviceAccountPath = path.join(process.cwd(), '../firebase_admin_key.json');
