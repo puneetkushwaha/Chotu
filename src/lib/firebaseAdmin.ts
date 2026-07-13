@@ -9,37 +9,9 @@ if (getApps().length === 0) {
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
     const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
-    if (projectId && clientEmail && privateKey) {
-      let cleanedKey = privateKey.trim();
-      
-      // Strip outer quotes if present in env var
-      if (cleanedKey.startsWith('"') && cleanedKey.endsWith('"')) {
-        cleanedKey = cleanedKey.slice(1, -1);
-      }
-      if (cleanedKey.startsWith("'") && cleanedKey.endsWith("'")) {
-        cleanedKey = cleanedKey.slice(1, -1);
-      }
-
-      console.log(`[Firebase Init] Key Length: ${cleanedKey.length}, Base64 structure: ${cleanedKey.substring(0, 15)}...`);
-
-      // Check if it's base64 encoded, then decode
-      let finalKey = cleanedKey;
-      if (!cleanedKey.includes('-----BEGIN PRIVATE KEY-----')) {
-        try {
-          const buffer = Buffer.from(cleanedKey, 'base64');
-          finalKey = buffer.toString('utf8');
-          console.log(`[Firebase Init] Base64 Decoded successfully. New length: ${finalKey.length}`);
-        } catch (e) {
-          console.error('[Firebase Init] Failed to decode Base64 private key:', e);
-        }
-      } else {
-        console.log('[Firebase Init] Key detected as raw text (contains header)');
-      }
-
-      // Final format replace just in case of non-base64 fallback
-      finalKey = finalKey.replace(/\\n/g, '\n');
-      
-      console.log(`[Firebase Init] Final Key Starts with: ${finalKey.substring(0, 30)}`);
+    if (projectId && clientEmail) {
+      // Clean private key direct configuration
+      const finalKey = `-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCpVrub6yclGKZy\nibMghTBCgnRc8rDYJBk3mFZsqxL8lku0Qo3K9IlEDFCsqbgBcjwHcJGMH0kpWMgW\n9mrvg+hltz7k0LiyEOo5k76Fa8nuoYPJdXZGb85VuvOFgRMv7Y4IOe05Y1MWmb/Q\nXcEoPTbbtzKYpc7j+DaoIB09hvJlI4yqQ8CF0CtVgXcxSGvyf2FtXkm2fjdMYPuT\n5DOK2DM+KogIEA9UKACG6R+MkNMRq9L1PMvU4fpFRZN9D3q9jEHJgKOtmsB9dzSZ\nu580hcT3RgZ3lwg9KNgaS3JQVL32ktKMAi+arjwtIbRMjMf9YRbC2DgVYvp3fKm0\ntxm3tIhrAgMBAAECggEACmieuYkXwTZQV4P9SFzHcvR1K0LDpKrQs1PKztJ+ept7\nuxsdf2x5L39Dn4lYb8ZSHZxJZf/aTbn7pTsE/Fny+VBCg8AMn5gIkvzGM4nvl0UY\nRlQmWVKwBSGrrE4bHCa8RJHYR18X5rC7/evKtAAnP2l1qQpaut/b7t5NIyYIqjdj\n6Q1JurrLtpn+SNHPffUr2v9REnpWW9ob3tArs7p54Pm/Ex/D20ew8ZSAjPg1Mtd4\nqmsB9UH992MvwN5566kgkztyx62ZV+BVIlP5aWku3RlYNYDuk++HZzGZCP46v1se\nCJ7gH9ky4N6xfySkvsq+ZL002A71fB3WQaRdiHhjiQKBgQDUlf5nBvfXSSrLlvYq\nhqNJryHlCFkF3MXcbGouEHnF5iOWnZ2HhB63/7OWhON/uWDdVKvi9OJJ2hg17l4A\nTwCuILORXbtOtk5yyV59J8uSsw4cNh+PnNXF+aoh8V0cbUa5EBM34HXO0Gyvk5wK\nTzTyuQUkl1IGQ/2yw0Y6TuJeRQKBgQDL68bro0oN7W36q7Ttvat3wZfWTJzTU+kt\ntkqvtppQ6IrI26k6HAc8ScU7/69kDiwbBdJdAY5oaers/GMMx0dqSWlGu4tos9bn\nemqUajwja5W8yOzCA3oGynTbW/wd/kerLZ/oHJijSljj5hK0cB3fZSDzgpHR1kpM\n6rUdNifO7wKBgQDKAg5RUKnKhdiIxdb96hrYNfd7cEdH7taF8u+i/jz49Qv0X6oF\n0GJwbib1bSnRgRKuv3rmm9U8YGaJOQ1SNcBrtt9rzyniThKVuQx02Y/0wvkxjazI\nBzyMeAZXYsgb7ys5SDE686x+7keZQCcTFNk3nOFqN/DVy14UtMLTPYqWEQKBgBK4\n3fWKc2Ud9Gf8VcsyC8kd9BPPyuI4JQN2ZhsF19svznYsfLgCFMP7PemJSxAToQcG\nM8/MlTxzIjfjzSAI1Vl0g2VcHI3eLad7aUcr9LMsN25UMtrSEvRULNHGbmjO+9C\nbBkCbx0m2UxrNjJszMFS5piU11B9rSqsrd41t6fvAoGAbxnlfw36Tm+OqsI4kZKb\nlOf7AGCMAboNNTKNWTH8SXcGbvnLFKCUeUBItvZz61lVeMHKm0Iy53uVJh9mgWpw\nTQfHC8SIQx5yEXzut3jCaV7KYQt156NhyEBep4tZsrKK2utMmoCLoaihp1O5BVNG\nZzjG/zqBn2n0YQVDC9P/jXM=\n-----END PRIVATE KEY-----`.replace(/\\n/g, '\n');
 
       initializeApp({
         credential: cert({
