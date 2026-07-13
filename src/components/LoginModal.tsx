@@ -48,8 +48,8 @@ export default function LoginModal({ onClose, onSuccess }: { onClose: () => void
       const res = await fetch(`https://2factor.in/API/V1/${API_KEY}/SMS/VERIFY/${verificationId}/${otpCode}`);
       const data = await res.json();
       if (data.Status === 'Success') {
-        // Save session locally
-        localStorage.setItem('chotu_merchant_phone', `+91${phone}`);
+        // Save session locally as customer phone
+        localStorage.setItem('chotu_customer_phone', `+91${phone}`);
         // Optionally trigger a reload or context update here
         if (onSuccess) onSuccess();
         onClose();
