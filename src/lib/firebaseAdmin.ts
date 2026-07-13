@@ -10,25 +10,36 @@ if (getApps().length === 0) {
     const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
     if (projectId && clientEmail && privateKey) {
-      // Clean and sanitize private key for OpenSSL compatibility
-      let formattedPrivateKey = privateKey.trim();
+      // Decode private key from Base64 to bypass escape/newline formatting issues
+      let cleanedKey = privateKey.trim();
       
-      // Strip outer quotes if present
-      if (formattedPrivateKey.startsWith('"') && formattedPrivateKey.endsWith('"')) {
-        formattedPrivateKey = formattedPrivateKey.slice(1, -1);
+      // Strip outer quotes if present in env var
+      if (cleanedKey.startsWith('"') && cleanedKey.endsWith('"')) {
+        cleanedKey = cleanedKey.slice(1, -1);
       }
-      if (formattedPrivateKey.startsWith("'") && formattedPrivateKey.endsWith("'")) {
-        formattedPrivateKey = formattedPrivateKey.slice(1, -1);
+      if (cleanedKey.startsWith("'") && cleanedKey.endsWith("'")) {
+        cleanedKey = cleanedKey.slice(1, -1);
       }
-      
-      // Replace double-escaped newlines with real newlines
-      formattedPrivateKey = formattedPrivateKey.replace(/\\n/g, '\n');
+
+      // Check if it's base64 encoded, then decode
+      let finalKey = cleanedKey;
+      if (!cleanedKey.includes('-----BEGIN PRIVATE KEY-----')) {
+        try {
+          const buffer = Buffer.from(cleanedKey, 'base64');
+          finalKey = buffer.toString('utf8');
+        } catch (e) {
+          console.error('Failed to decode Base64 private key, using raw value:', e);
+        }
+      }
+
+      // Final format replace just in case of non-base64 fallback
+      finalKey = finalKey.replace(/\\n/g, '\n');
       
       initializeApp({
         credential: cert({
           projectId,
           clientEmail,
-          privateKey: formattedPrivateKey,
+          privateKey: finalKey,
         }),
       });
       console.log('Firebase Admin SDK initialized successfully from individual environment variables.');
