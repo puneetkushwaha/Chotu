@@ -10,8 +10,20 @@ if (getApps().length === 0) {
     const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
     if (projectId && clientEmail && privateKey) {
-      // Reconstruct credentials from direct individual environment variables
-      const formattedPrivateKey = privateKey.replace(/\\n/g, '\n');
+      // Clean and sanitize private key for OpenSSL compatibility
+      let formattedPrivateKey = privateKey.trim();
+      
+      // Strip outer quotes if present
+      if (formattedPrivateKey.startsWith('"') && formattedPrivateKey.endsWith('"')) {
+        formattedPrivateKey = formattedPrivateKey.slice(1, -1);
+      }
+      if (formattedPrivateKey.startsWith("'") && formattedPrivateKey.endsWith("'")) {
+        formattedPrivateKey = formattedPrivateKey.slice(1, -1);
+      }
+      
+      // Replace double-escaped newlines with real newlines
+      formattedPrivateKey = formattedPrivateKey.replace(/\\n/g, '\n');
+      
       initializeApp({
         credential: cert({
           projectId,
