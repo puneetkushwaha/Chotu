@@ -10,7 +10,6 @@ if (getApps().length === 0) {
     const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
     if (projectId && clientEmail && privateKey) {
-      // Decode private key from Base64 to bypass escape/newline formatting issues
       let cleanedKey = privateKey.trim();
       
       // Strip outer quotes if present in env var
@@ -21,20 +20,27 @@ if (getApps().length === 0) {
         cleanedKey = cleanedKey.slice(1, -1);
       }
 
+      console.log(`[Firebase Init] Key Length: ${cleanedKey.length}, Base64 structure: ${cleanedKey.substring(0, 15)}...`);
+
       // Check if it's base64 encoded, then decode
       let finalKey = cleanedKey;
       if (!cleanedKey.includes('-----BEGIN PRIVATE KEY-----')) {
         try {
           const buffer = Buffer.from(cleanedKey, 'base64');
           finalKey = buffer.toString('utf8');
+          console.log(`[Firebase Init] Base64 Decoded successfully. New length: ${finalKey.length}`);
         } catch (e) {
-          console.error('Failed to decode Base64 private key, using raw value:', e);
+          console.error('[Firebase Init] Failed to decode Base64 private key:', e);
         }
+      } else {
+        console.log('[Firebase Init] Key detected as raw text (contains header)');
       }
 
       // Final format replace just in case of non-base64 fallback
       finalKey = finalKey.replace(/\\n/g, '\n');
       
+      console.log(`[Firebase Init] Final Key Starts with: ${finalKey.substring(0, 30)}`);
+
       initializeApp({
         credential: cert({
           projectId,
@@ -42,7 +48,7 @@ if (getApps().length === 0) {
           privateKey: finalKey,
         }),
       });
-      console.log('Firebase Admin SDK initialized successfully from individual environment variables.');
+      console.log('Firebase Admin SDK initialized successfully.');
     } else {
       // Fallback to local file for development
       const serviceAccountPath = path.join(process.cwd(), '../firebase_admin_key.json');
