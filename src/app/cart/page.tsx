@@ -30,7 +30,7 @@ export default function CartPage() {
       return;
     }
     if (!form.name || !form.phone || !form.address) {
-      setError('Please fill all required fields');
+      setError('Please fill Name, Phone and Delivery Address before placing order');
       return;
     }
     if (items.length === 0) { setError('Your cart is empty'); return; }
@@ -38,7 +38,7 @@ export default function CartPage() {
     setLoading(true);
     setError('');
 
-    const store_id = items[0].store_id;
+    const store_id = items[0]?.store_id;
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -46,18 +46,18 @@ export default function CartPage() {
         body: JSON.stringify({
           store_id,
           customer_name: form.name,
-          customer_phone: `+91${form.phone}`,
+          customer_phone: form.phone.startsWith('+91') ? form.phone : `+91${form.phone}`,
           customer_email: form.email,
           delivery_address: form.address,
           items: items.map(i => ({ product_id: i.product_id, quantity: i.quantity, price: i.price })),
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error || `Server error: ${res.status}`);
       clearCart();
       router.push(`/order/${data.order_id}`);
     } catch (err: any) {
-      setError(err.message || 'Failed to place order. Try again.');
+      setError(err.message || 'Failed to place order. Please try again.');
     }
     setLoading(false);
   };

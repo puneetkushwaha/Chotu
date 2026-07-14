@@ -218,39 +218,44 @@ export default function Navbar() {
                 <button
                   onClick={() => setShowProfileMenu(v => !v)}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    background: 'var(--bg-page)', border: '1.5px solid var(--border)',
-                    borderRadius: 50, padding: '6px 14px 6px 8px', cursor: 'pointer',
-                    fontWeight: 700, fontSize: 14, color: 'var(--text-primary)'
-                  }}
-                >
-                  <div style={{
-                    width: 30, height: 30, borderRadius: '50%',
-                    background: 'var(--brand-green)', display: 'flex',
+                    width: 40, height: 40, borderRadius: '50%',
+                    background: 'var(--brand-green)',
+                    border: '2px solid rgba(10,92,54,0.3)',
+                    cursor: 'pointer', display: 'flex',
                     alignItems: 'center', justifyContent: 'center',
-                    color: 'white', fontWeight: 800, fontSize: 13
-                  }}>
-                    {auth.phone?.slice(-2) || '👤'}
-                  </div>
-                  <span style={{ maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {auth.phone?.replace('+91', '')}
-                  </span>
+                    boxShadow: '0 2px 8px rgba(10,92,54,0.25)',
+                  }}
+                  title="Profile"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
                 </button>
                 {showProfileMenu && (
                   <div style={{
                     position: 'absolute', right: 0, top: '110%', background: 'white',
                     border: '1px solid var(--border)', borderRadius: 12,
-                    boxShadow: 'var(--shadow-lg)', zIndex: 1000, minWidth: 160, padding: '8px 0'
+                    boxShadow: 'var(--shadow-lg)', zIndex: 1000, minWidth: 180, padding: '8px 0',
+                    animation: 'fadeIn 0.15s ease'
                   }}>
-                    <a href="/" style={{ display: 'block', padding: '10px 16px', fontSize: 14, color: 'var(--text-primary)', fontWeight: 600, textDecoration: 'none' }}
+                    <div style={{ padding: '10px 16px 8px', borderBottom: '1px solid var(--border-light)' }}>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>Logged in as</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginTop: 2 }}>{auth.phone?.replace('+91', '+91 ')}</div>
+                    </div>
+                    <a href="/profile" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', fontSize: 14, color: 'var(--text-primary)', fontWeight: 600, textDecoration: 'none' }}
                       onClick={() => setShowProfileMenu(false)}>
-                      🏠 Home
+                      <span>👤</span> My Profile
+                    </a>
+                    <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', fontSize: 14, color: 'var(--text-primary)', fontWeight: 600, textDecoration: 'none' }}
+                      onClick={() => setShowProfileMenu(false)}>
+                      <span>🏠</span> Home
                     </a>
                     <button
                       onClick={() => { auth.logout(); setShowProfileMenu(false); }}
-                      style={{ width: '100%', textAlign: 'left', padding: '10px 16px', fontSize: 14, color: '#DC2626', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}
+                      style={{ width: '100%', textAlign: 'left', padding: '10px 16px', fontSize: 14, color: '#DC2626', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
                     >
-                      🚪 Logout
+                      <span>🚪</span> Logout
                     </button>
                   </div>
                 )}
