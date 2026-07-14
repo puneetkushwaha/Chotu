@@ -1,18 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useLocation } from '@/context/LocationContext';
+import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import LoginModal from './LoginModal';
+
 
 export default function Navbar() {
   const router = useRouter();
   const { itemCount, setIsOpen, addItem, items, updateQty } = useCart();
   const { location, deliveryTime } = useLocation();
+  const auth = useAuth();
   const [showLogin, setShowLogin] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchVal, setSearchVal] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+
 
   const placeholders = ["atta, dal, rice...", "milk, bread, butter...", "chips, cold drinks...", "fresh vegetables...", "maggi, noodles..."];
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
@@ -208,19 +213,65 @@ export default function Navbar() {
 
           {/* Actions */}
           <div className="navbar-actions">
-            <button className="btn-login" onClick={() => setShowLogin(true)}>
-              Login
-            </button>
+            {auth.isLoggedIn ? (
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setShowProfileMenu(v => !v)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    background: 'var(--bg-page)', border: '1.5px solid var(--border)',
+                    borderRadius: 50, padding: '6px 14px 6px 8px', cursor: 'pointer',
+                    fontWeight: 700, fontSize: 14, color: 'var(--text-primary)'
+                  }}
+                >
+                  <div style={{
+                    width: 30, height: 30, borderRadius: '50%',
+                    background: 'var(--brand-green)', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center',
+                    color: 'white', fontWeight: 800, fontSize: 13
+                  }}>
+                    {auth.phone?.slice(-2) || '👤'}
+                  </div>
+                  <span style={{ maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {auth.phone?.replace('+91', '')}
+                  </span>
+                </button>
+                {showProfileMenu && (
+                  <div style={{
+                    position: 'absolute', right: 0, top: '110%', background: 'white',
+                    border: '1px solid var(--border)', borderRadius: 12,
+                    boxShadow: 'var(--shadow-lg)', zIndex: 1000, minWidth: 160, padding: '8px 0'
+                  }}>
+                    <a href="/" style={{ display: 'block', padding: '10px 16px', fontSize: 14, color: 'var(--text-primary)', fontWeight: 600, textDecoration: 'none' }}
+                      onClick={() => setShowProfileMenu(false)}>
+                      🏠 Home
+                    </a>
+                    <button
+                      onClick={() => { auth.logout(); setShowProfileMenu(false); }}
+                      style={{ width: '100%', textAlign: 'left', padding: '10px 16px', fontSize: 14, color: '#DC2626', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                      🚪 Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button className="btn-login" onClick={() => setShowLogin(true)}>
+                Login
+              </button>
+            )}
             <button className="btn-cart" onClick={() => setIsOpen(true)}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
               My Cart
               {itemCount > 0 && <span className="cart-badge">{itemCount}</span>}
             </button>
           </div>
+
         </div>
       </nav>
 
-      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} onSuccess={(ph) => { auth.login(ph); setShowLogin(false); }} />}
+
     </>
   );
 }

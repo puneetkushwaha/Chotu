@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
 
-export default function LoginModal({ onClose, onSuccess }: { onClose: () => void, onSuccess?: () => void }) {
+export default function LoginModal({ onClose, onSuccess }: { onClose: () => void, onSuccess?: (phone: string) => void }) {
+
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -50,8 +51,7 @@ export default function LoginModal({ onClose, onSuccess }: { onClose: () => void
       if (data.Status === 'Success') {
         // Save session locally as customer phone
         localStorage.setItem('chotu_customer_phone', `+91${phone}`);
-        // Optionally trigger a reload or context update here
-        if (onSuccess) onSuccess();
+        if (onSuccess) onSuccess(`+91${phone}`);
         onClose();
       } else {
         setError(data.Details || 'Invalid OTP');

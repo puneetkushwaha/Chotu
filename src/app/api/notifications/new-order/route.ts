@@ -3,10 +3,6 @@ import '../../../../lib/firebaseAdmin';
 import { getMessaging } from 'firebase-admin/messaging';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 /**
  * POST /api/notifications/new-order
@@ -14,6 +10,10 @@ const supabase = createClient(
  * Called when a new order is inserted in the Supabase 'orders' table.
  */
 export async function POST(req: NextRequest) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
   try {
     const payload = await req.json();
     const record = payload.record ?? payload;

@@ -1,6 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import CartDrawer from '@/components/CartDrawer';
 import { useRouter } from 'next/navigation';
@@ -8,16 +9,23 @@ import LoginModal from '@/components/LoginModal';
 
 export default function CartPage() {
   const { items, updateQty, clearCart, total } = useCart();
+  const auth = useAuth();
   const router = useRouter();
   const DELIVERY_FEE = 25;
   const [form, setForm] = useState({ name: '', phone: '', email: '', address: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showLogin, setShowLogin] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Auto-fill phone when logged in
+  useEffect(() => {
+    if (auth.phone) {
+      setForm(f => ({ ...f, phone: auth.phone!.replace('+91', '') }));
+    }
+  }, [auth.phone]);
 
   const handleOrder = async () => {
-    if (!isLoggedIn) {
+    if (!auth.isLoggedIn) {
       setShowLogin(true);
       return;
     }
@@ -38,7 +46,7 @@ export default function CartPage() {
         body: JSON.stringify({
           store_id,
           customer_name: form.name,
-          customer_phone: form.phone,
+          customer_phone: `+91${form.phone}`,
           customer_email: form.email,
           delivery_address: form.address,
           items: items.map(i => ({ product_id: i.product_id, quantity: i.quantity, price: i.price })),
@@ -105,6 +113,25 @@ export default function CartPage() {
             {/* Delivery Details */}
             <div className="cart-page-section">
               <div className="cart-page-section-header">📍 Delivery Details</div>
+              {!auth.isLoggedIn && (
+                <div style={{
+                  background: '#FFF7ED', border: '1.5px solid #F97316',
+                  borderRadius: 10, padding: '12px 16px', marginBottom: 16,
+                  display: 'flex', alignItems: 'center', gap: 12
+                }}>
+                  <span style={{ fontSize: 20 }}>🔐</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: '#C2410C' }}>Login required to place order</div>
+                    <div style={{ fontSize: 13, color: '#78350F', marginTop: 2 }}>Login with your phone number to continue</div>
+                  </div>
+                  <button
+                    onClick={() => setShowLogin(true)}
+                    style={{ background: '#F97316', color: 'white', border: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+                  >
+                    Login
+                  </button>
+                </div>
+              )}
               <div className="checkout-form">
                 <div className="form-group">
                   <label className="form-label">Full Name *</label>
@@ -112,7 +139,11 @@ export default function CartPage() {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Phone Number *</label>
-                  <input className="form-input" placeholder="10-digit mobile number" type="tel" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g,'').slice(0,10) }))} />
+                  <input className="form-input" placeholder="10-digit mobile number" type="tel" value={form.phone}
+                    onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g,'').slice(0,10) }))}
+                    readOnly={auth.isLoggedIn}
+                    style={{ background: auth.isLoggedIn ? 'var(--bg-page)' : undefined }}
+                  />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Email (for invoice)</label>
@@ -144,7 +175,12 @@ export default function CartPage() {
           </div>
         </div>
       </div>
-      {showLogin && <LoginModal onClose={() => setShowLogin(false)} onSuccess={() => setIsLoggedIn(true)} />}
+      {showLogin && (
+        <LoginModal
+          onClose={() => setShowLogin(false)}
+          onSuccess={(ph) => { auth.login(ph); setShowLogin(false); }}
+        />
+      )}
     </>
   );
 }

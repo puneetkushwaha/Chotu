@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { LocationProvider } from "@/context/LocationContext";
+import { AuthProvider } from "@/context/AuthContext";
 import NotificationInitializer from "@/components/NotificationInitializer";
+
 
 export const metadata: Metadata = {
   title: "Chotu — Apni Dukaan, Ghar Tak",
@@ -21,11 +23,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <NotificationInitializer />
-        <LocationProvider>
-          <CartProvider>
-            {children}
-          </CartProvider>
-        </LocationProvider>
+        <AuthProvider>
+          <LocationProvider>
+            <CartProvider>
+              {children}
+            </CartProvider>
+          </LocationProvider>
+        </AuthProvider>
       </body>
     </html>
   );

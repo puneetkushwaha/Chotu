@@ -3,10 +3,9 @@ import '../../../../lib/firebaseAdmin';
 import { getMessaging } from 'firebase-admin/messaging';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// ✅ FIX: Do NOT create client at module-level — env vars unavailable at build time
+// Client is created lazily inside the request handler
+
 
 // Map order delivery_status codes to human-readable messages
 const STATUS_MESSAGES: Record<string, { title: string; body: string }> = {
@@ -27,6 +26,12 @@ const STATUS_MESSAGES: Record<string, { title: string; body: string }> = {
  * { "type": "UPDATE", "record": { "id": "...", "delivery_status": "...", "customer_phone": "..." }, ... }
  */
 export async function POST(req: NextRequest) {
+  // Create Supabase client lazily inside handler (env vars available at runtime, not build time)
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
   try {
     // Validate webhook secret to prevent unauthorized calls
     const webhookSecret = req.headers.get('x-webhook-secret');
